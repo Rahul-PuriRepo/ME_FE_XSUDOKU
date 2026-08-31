@@ -1,133 +1,145 @@
 import React, { useState } from "react";
 
-const winningCombinations = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
-];
+const emptyBoard = Array(81).fill("");
 
 function App() {
-  const [board, setBoard] = useState(Array(9).fill(""));
-  const [turn, setTurn] = useState("X");
-  const [scores, setScores] = useState({
-    X: 0,
-    O: 0,
-    draws: 0,
-  });
-  const [winner, setWinner] = useState(null);
-  const [winningCells, setWinningCells] = useState([]);
+  const [board, setBoard] = useState(emptyBoard);
+  const [invalidCells, setInvalidCells] = useState([]);
+  const [message, setMessage] = useState("");
 
-  const checkWinner = (currentBoard) => {
-    for (const combination of winningCombinations) {
-      const [a, b, c] = combination;
+  const handleChange = (index, value) => {
+    if (value === "" || /^[1-9]$/.test(value)) {
+      const newBoard = [...board];
+      newBoard[index] = value;
+      setBoard(newBoard);
+      setInvalidCells([]);
+      setMessage("");
+    }
+  };
 
-      if (
-        currentBoard[a] &&
-        currentBoard[a] === currentBoard[b] &&
-        currentBoard[a] === currentBoard[c]
-      ) {
-        return combination;
+  const findConflicts = () => {
+    const conflicts = new Set();
+
+    const addDuplicates = (indices) => {
+      const seen = {};
+
+      indices.forEach((index) => {
+        const value = board[index];
+
+        if (!value) {
+          return;
+        }
+
+        if (!seen[value]) {
+          seen[value] = [];
+        }
+
+        seen[value].push(index);
+      });
+
+      Object.values(seen).forEach((indexes) => {
+        if (indexes.length > 1) {
+          indexes.forEach((index) => conflicts.add(index));
+        }
+      });
+    };
+
+    // Check rows
+    for (let row = 0; row < 9; row += 1) {
+      const indices = [];
+
+      for (let col = 0; col < 9; col += 1) {
+        indices.push(row * 9 + col);
+      }
+
+      addDuplicates(indices);
+    }
+
+    // Check columns
+    for (let col = 0; col < 9; col += 1) {
+      const indices = [];
+
+      for (let row = 0; row < 9; row += 1) {
+        indices.push(row * 9 + col);
+      }
+
+      addDuplicates(indices);
+    }
+
+    // Check 3x3 boxes
+    for (let boxRow = 0; boxRow < 3; boxRow += 1) {
+      for (let boxCol = 0; boxCol < 3; boxCol += 1) {
+        const indices = [];
+
+        for (let row = 0; row < 3; row += 1) {
+          for (let col = 0; col < 3; col += 1) {
+            indices.push(
+              (boxRow * 3 + row) * 9 + (boxCol * 3 + col)
+            );
+          }
+        }
+
+        addDuplicates(indices);
       }
     }
 
-    return null;
+    return Array.from(conflicts);
   };
 
-  const handleCellClick = (index) => {
-    if (board[index] || winner) {
-      return;
+  const handleValidate = () => {
+    const conflicts = findConflicts();
+
+    if (conflicts.length > 0) {
+      setInvalidCells(conflicts);
+      setMessage("❌ Invalid Sudoku! Conflicts found.");
+    } else {
+      setInvalidCells([]);
+      setMessage("✅ Sudoku is valid so far!");
     }
-
-    const newBoard = [...board];
-    newBoard[index] = turn;
-
-    const winningCombination = checkWinner(newBoard);
-
-    if (winningCombination) {
-      setBoard(newBoard);
-      setWinner(turn);
-      setWinningCells(winningCombination);
-      setScores((previous) => ({
-        ...previous,
-        [turn]: previous[turn] + 1,
-      }));
-      return;
-    }
-
-    if (newBoard.every((cell) => cell !== "")) {
-      setBoard(newBoard);
-      setWinner("Draw");
-      setScores((previous) => ({
-        ...previous,
-        draws: previous.draws + 1,
-      }));
-      return;
-    }
-
-    setBoard(newBoard);
-    setTurn(turn === "X" ? "O" : "X");
   };
 
-  const restartRound = () => {
-    setBoard(Array(9).fill(""));
-    setTurn("X");
-    setWinner(null);
-    setWinningCells([]);
-  };
-
-  const resetAll = () => {
-    restartRound();
-    setScores({
-      X: 0,
-      O: 0,
-      draws: 0,
-    });
+  const handleClear = () => {
+    setBoard([...emptyBoard]);
+    setInvalidCells([]);
+    setMessage("");
   };
 
   return (
     <div className="page">
-      <div className="game-card">
-        <h1>Tic-Tac-Toe</h1>
+      <div className="card">
+        <h1>Sudoku Validator</h1>
 
-        <div className="scores">
-          <span className="score x-score">X: {scores.X}</span>
-          <span className="score">Draws: {scores.draws}</span>
-          <span className="score o-score">O: {scores.O}</span>
-        </div>
-
-        <div className="turn">
-          {winner === "Draw" ? "Draw!" : winner ? `Winner: ${winner}` : `Turn: ${turn}`}
-        </div>
+        <p>Enter numbers 1-9 and validate the board.</p>
 
         <div className="board">
-          {board.map((cell, index) => (
-            <button
+          {board.map((value, index) => (
+            <input
               key={index}
               className={`cell ${
-                winningCells.includes(index) ? "winning-cell" : ""
+                invalidCells.includes(index) ? "invalid" : ""
               }`}
-              onClick={() => handleCellClick(index)}
+              value={value}
+              maxLength={1}
+              inputMode="numeric"
+              onChange={(event) =>
+                handleChange(index, event.target.value)
+              }
               aria-label={`Cell ${index + 1}`}
-            >
-              {cell.toLowerCase()}
-            </button>
+            />
           ))}
         </div>
 
         <div className="actions">
-          <button className="primary-button" onClick={restartRound}>
-            {winner ? "Play Again" : "Restart Round"}
+          <button className="validate" onClick={handleValidate}>
+            Validate
           </button>
 
-          <button className="secondary-button" onClick={resetAll}>
-            Reset All
+          <button className="clear" onClick={handleClear}>
+            Clear
           </button>
         </div>
+
+        {message && <div className="message">{message}</div>}
       </div>
     </div>
   );
