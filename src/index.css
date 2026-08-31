@@ -10,88 +10,65 @@ body {
 
 .page {
   min-height: 100vh;
-  background: #df7073;
+  background: #f5f6fa;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
 }
 
-.game-card {
-  width: 290px;
+.card {
+  width: 323px;
   background: #ffffff;
-  border-radius: 9px;
-  padding: 14px 28px;
+  border-radius: 7px;
+  padding: 16px 32px;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.12);
 }
 
 h1 {
-  margin: 0 0 8px;
-  font-size: 20px;
+  margin: 0 0 2px;
+  font-size: 28px;
   font-weight: 800;
   color: #101827;
 }
 
-.scores {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin-bottom: 9px;
-}
-
-.score {
+p {
+  margin: 0 0 10px;
   font-size: 9px;
-  padding: 4px 7px;
-  border-radius: 10px;
-  background: #f6f8fa;
-  border: 1px solid #e8ebef;
-  color: #334155;
-}
-
-.x-score {
-  color: #ff3333;
-}
-
-.o-score {
-  color: #1688ed;
-}
-
-.turn {
-  height: 18px;
-  margin-bottom: 7px;
-  font-size: 9px;
-  font-weight: 700;
-  color: #111827;
+  color: #8490a5;
 }
 
 .board {
-  width: 220px;
+  width: 261px;
   margin: 0 auto 9px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 5px;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 2px;
 }
 
 .cell {
-  width: 68px;
-  height: 68px;
+  width: 28px;
+  height: 28px;
   padding: 0;
-  border: 1px solid #e2e6eb;
-  border-radius: 6px;
-  background: #ffffff;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
+  border: 1px solid #ffffff;
+  border-radius: 0;
+  background: #3d3d3d;
+  color: #ffffff;
+  text-align: center;
+  font-size: 11px;
+  outline: none;
 }
 
-.cell:hover {
-  background: #fafafa;
+.cell:focus {
+  outline: 2px solid #2864e8;
+  outline-offset: -2px;
 }
 
-.winning-cell {
-  border: 2px solid #31d875;
-  color: #31d875;
+.cell.invalid {
+  background: #ffdada;
+  color: #ffffff;
+  border-color: #ffb5b5;
 }
 
 .actions {
@@ -102,20 +79,27 @@ h1 {
 
 .actions button {
   border-radius: 5px;
-  padding: 6px 9px;
+  padding: 6px 10px;
   font-size: 9px;
   font-weight: 700;
   cursor: pointer;
 }
 
-.primary-button {
+.validate {
   border: none;
   background: #2864e8;
   color: white;
 }
 
-.secondary-button {
-  border: 1px solid #e5e7eb;
-  background: white;
-  color: #111827;
+.clear {
+  border: none;
+  background: #ed3d42;
+  color: white;
+}
+
+.message {
+  margin-top: 8px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #202020;
 }
